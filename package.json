@@ -1,0 +1,41 @@
+{
+  "name": "file-list-plugin",
+  "version": "0.0.1",
+  "description": "A webpack plugin that creates a file list of files omitted by file-loader",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "webpack",
+    "file",
+    "list",
+    "file list",
+    "loader",
+    "pluigin",
+    "images listing",
+    "priority",
+    "above the fold"
+  ],
+  "author": "Vitalik Zaidman (vzaidman@gmail.com)",
+  "license": "MIT",
+  "dependencies": {
+    "file-loader": "^0.10.1",
+    "loader-utils": "^1.0.2"
+  },
+  "devDependencies": {
+    "codecov": "~1.0.1",
+    "css-loader": "0.26.1",
+    "expect.js": "~0.3.1",
+    "istanbul": "~0.4.5",
+    "less": "~2.7.2",
+    "less-loader": "~2.2.2",
+    "lodash": "^4.17.4",
+    "mocha": "~3.2.0",
+    "node-sass": "~4.5.0",
+    "object-assign": "~4.1.0",
+    "rimraf": "^2.6.1",
+    "sass-loader": "~6.0.0",
+    "webpack": "~2.2.1"
+  }
+}
