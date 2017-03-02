@@ -43,7 +43,7 @@ describe('list-images-plugin', function () {
   }
 
   // Clean generated cache files before each test so that we can call each test with an empty state.
-  afterEach(function (done) {
+  beforeEach(function (done) {
     rimraf(outputDir, done)
   })
 
