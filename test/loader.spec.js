@@ -56,19 +56,26 @@ describe('file-list-plugin', function () {
       webpack(config, function (err) {
         expect(err).to.be(null)
 
-        fs.readFile(defaultAssetListFile, function (err, data) {
+        fs.readFile(defaultAssetListFile, function(err, fileListData){
+          fileListData = fileListData.toString()
+          var fileListLines = fileListData.split('\n')
 
-          var encoded = data.toString()
-          var lines = encoded.split('\n')
+          expect(fileListLines.length).to.be(2)
 
-          expect(lines.length).to.be(2)
-          lines.forEach(function(line){
-            expect(/\*.png/.test(line)).to.be(true)
+          fs.readFile(bundleFileSrc, function(err, bundleFileData){
+            bundleFileData = bundleFileData.toString()
+
+            fileListLines.forEach(function(line){
+
+              expect(line.indexOf('.png')).to.not.be(-1)
+
+              expect(bundleFileData.indexOf(line)).to.not.be(-1)
+
+            })
+
+            done()
           })
-
-          done()
         })
-
       })
     })
   })
