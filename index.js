@@ -1,6 +1,4 @@
-var flatMap = require('lodash.flatmap')
-var keys = require('lodash.keys')
-var defaults = require('lodash.defaults')
+var _ = require('lodash')
 
 var defaultOptions = {
   fileName: 'asset-list.txt',
@@ -11,15 +9,15 @@ var defaultOptions = {
     return true
   },
   mapModules: function defaultMapModules(module){
-    return keys(module.assets)
+    return _.keys(module.assets)
   },
   format: function defaultFormat(listItems){
-    return listItems.join('\n')
+    return _.uniq(listItems).join('\n')
   }
 }
 
 function FileListPlugin(options) {
-  defaults(this, options, defaultOptions)
+  _.defaults(this, options, defaultOptions)
 }
 
 FileListPlugin.prototype.apply = function(compiler) {
@@ -32,11 +30,10 @@ FileListPlugin.prototype.apply = function(compiler) {
   compiler.plugin('emit', function(compilation, callback) {
     var chunks = compilation.chunks.filter(filterChunks)
 
-    var modules = flatMap(chunks, function(chunk){
-      return chunk.modules
-    }).filter(filterModules)
+    var modules = _.flatMap(chunks, 'modules')
+      .filter(filterModules)
 
-    var listItems = flatMap(modules, mapModules)
+    var listItems = _.flatMap(modules, mapModules)
 
     var list = format(listItems)
 

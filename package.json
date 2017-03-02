@@ -1,6 +1,6 @@
 {
   "name": "file-list-plugin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A webpack plugin that creates a file list of files omitted by file-loader",
   "main": "index.js",
   "scripts": {
@@ -20,9 +20,7 @@
   "author": "Vitalik Zaidman (vzaidman@gmail.com)",
   "license": "MIT",
   "dependencies": {
-    "lodash.defaults": "^4.2.0",
-    "lodash.flatmap": "^4.5.0",
-    "lodash.keys": "^4.2.0"
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "codecov": "~1.0.1",

@@ -23,12 +23,12 @@ plugins: [
     
     // Decide how to map a module to list entries
     mapModules: function defaultMapModules(module){
-      return keys(module.assets)
+      return _.keys(module.assets)
     },
     
     // Decide how to format the list
     format: function defaultFormat(listItems){
-      return listItems.join('\n')
+      return _.uniq(listItems).join('\n')
     }
   })
 ]
