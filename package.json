@@ -20,11 +20,9 @@
   "author": "Vitalik Zaidman (vzaidman@gmail.com)",
   "license": "MIT",
   "dependencies": {
-    "file-loader": "^0.10.1",
     "lodash.defaults": "^4.2.0",
     "lodash.flatmap": "^4.5.0",
-    "lodash.keys": "^4.2.0",
-    "urijs": "^1.18.8"
+    "lodash.keys": "^4.2.0"
   },
   "devDependencies": {
     "codecov": "~1.0.1",
