@@ -29,38 +29,31 @@ FileListPlugin.prototype.apply = function(compiler) {
   var mapModules = this.mapModules
   var format = this.format
 
-  compiler.plugin('compilation', function(compilation) {
-    compiler.plugin('additional-chunk-assets', function(callback){
-      callback()
-    })
+  compiler.plugin('emit', function(compilation, callback) {
+    var chunks = compilation.chunks.filter(filterChunks)
 
-    compilation.plugin('additional-assets', function(callback) {
+    var modules = flatMap(chunks, function(chunk){
+      return chunk.modules
+    }).filter(filterModules)
 
-      var chunks = compilation.chunks.filter(filterChunks)
+    var listItems = flatMap(modules, mapModules)
 
-      var modules = flatMap(chunks, function(chunk){
-        return chunk.modules
-      }).filter(filterModules)
+    var list = format(listItems)
 
-      var listItems = flatMap(modules, mapModules)
+    if(typeof(list) !== 'string'){
+      list = JSON.stringify(list)
+    }
 
-      var list = format(listItems)
-
-      if(typeof(list) !== 'string'){
-        list = JSON.stringify(list)
+    compilation.assets[fileName] = {
+      source: function() {
+        return list
+      },
+      size: function() {
+        return list.length
       }
+    }
 
-      compilation.assets[fileName] = {
-        source: function() {
-          return list
-        },
-        size: function() {
-          return list.length
-        }
-      }
-
-      callback()
-    })
+    callback()
   })
 }
 
