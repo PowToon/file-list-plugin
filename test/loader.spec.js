@@ -27,12 +27,19 @@ describe('file-list-plugin', function () {
       module: {
         rules: [
           {
+            test: /\.scss$/,
+            exclude: /node_modules/,
+            use: [
+              { loader: 'css-loader' },
+              { loader: 'sass-loader' }
+            ]
+          },
+          {
             test: /\.png$/,
             exclude: /node_modules/,
-            use: {
-              loader: 'file-loader',
-              options: {}
-            }
+            use: [
+              { loader: 'file-loader' }
+            ]
           }
         ]
       }
@@ -48,6 +55,39 @@ describe('file-list-plugin', function () {
     it('should create a list of loaded images when importing them into js', function (done) {
       var config = getConfig({
         entry: './test/input/logo.js',
+        plugins: [
+          new FileListPlugin()
+        ]
+      })
+
+      webpack(config, function (err) {
+        expect(err).to.be(null)
+
+        fs.readFile(defaultAssetListFile, function(err, fileListData){
+          fileListData = fileListData.toString()
+          var fileListLines = fileListData.split('\n')
+
+          expect(fileListLines.length).to.be(2)
+
+          fs.readFile(bundleFileSrc, function(err, bundleFileData){
+            bundleFileData = bundleFileData.toString()
+
+            fileListLines.forEach(function(line){
+
+              expect(line.indexOf('.png')).to.not.be(-1)
+
+              expect(bundleFileData.indexOf(line)).to.not.be(-1)
+
+            })
+
+            done()
+          })
+        })
+      })
+    })
+    it('should create a list of loaded images when importing them using url in sass', function (done) {
+      var config = getConfig({
+        entry: './test/input/scss.js',
         plugins: [
           new FileListPlugin()
         ]
