@@ -7,23 +7,17 @@ var rimraf = require('rimraf')
 
 var FileListPlugin = require('../index')
 
-describe('list-images-plugin', function () {
+describe('file-list-plugin', function () {
   'use strict'
 
   this.timeout(10000)
 
   var outputDir = path.resolve(__dirname, './output'),
     bundleFileName = 'bundle.js',
-    bundleFileSrc = path.join(outputDir, bundleFileName)
+    bundleFileSrc = path.join(outputDir, bundleFileName),
+    defaultAssetListFile = path.join(outputDir, FileListPlugin.defaultOptions.fileName)
 
-  var getConfig = function (options, use) {
-    use = use || [
-      {
-        loader: 'file-loader',
-        options: {}
-      }
-    ]
-
+  var getConfig = function (options) {
     return assign({
       context: path.resolve(__dirname, '../'),
       output: {
@@ -33,9 +27,12 @@ describe('list-images-plugin', function () {
       module: {
         rules: [
           {
-            test: /\.png/,
+            test: /\.png$/,
             exclude: /node_modules/,
-            use: use
+            use: {
+              loader: 'file-loader',
+              options: {}
+            }
           }
         ]
       }
@@ -43,12 +40,12 @@ describe('list-images-plugin', function () {
   }
 
   // Clean generated cache files before each test so that we can call each test with an empty state.
-  beforeEach(function (done) {
+  afterEach(function (done) {
     rimraf(outputDir, done)
   })
 
   describe('simple usage', function () {
-    it('should create a list of loaded images when using file loader', function (done) {
+    it('should create a list of loaded images when importing them into js', function (done) {
       var config = getConfig({
         entry: './test/input/logo.js',
         plugins: [
@@ -59,11 +56,15 @@ describe('list-images-plugin', function () {
       webpack(config, function (err) {
         expect(err).to.be(null)
 
-        fs.readFile(bundleFileSrc, function (err, data) {
+        fs.readFile(defaultAssetListFile, function (err, data) {
 
-          var encoded = (0, eval)(data.toString())
+          var encoded = data.toString()
+          var lines = encoded.split('\n')
 
-          console.log(encoded)
+          expect(lines.length).to.be(2)
+          lines.forEach(function(line){
+            expect(/\*.png/.test(line)).to.be(true)
+          })
 
           done()
         })
