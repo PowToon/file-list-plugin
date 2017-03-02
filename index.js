@@ -1,25 +1,55 @@
-function FileListPlugin(options) {}
+var URI = require('urijs')
+
+var flatMap = require('lodash.flatmap')
+var keys = require('lodash.keys')
+var defaults = require('lodash.defaults')
+
+function FileListPlugin(options) {
+  defaults(this, options, {
+    fileName: 'asset-list.txt',
+
+    filterModules: function defaultFilterModules(module){
+      return URI(module.rawRequest).hasQuery('load', 'prefetch')
+    },
+
+    mapModules: function defaultMapModules(module){
+      return keys(module.assets)
+    },
+
+    format: function defaultFormat(listEntries){
+      return listEntries.join('\n')
+    }
+  })
+}
 
 FileListPlugin.prototype.apply = function(compiler) {
-  compiler.plugin('emit', function(compilation, callback) {
+  var filterModules = this.filterModules
+  var mapModules = this.mapModules
+  var format = this.format
+  var fileName = this.fileName
 
-    const prefetchList = Object.keys(compilation.assets)
-      .filter(function(asset){
-        return /png/.test(asset)
-      })
-      .join('\n')
+  compiler.plugin('this-compilation', function(compilation) {
+    compilation.plugin('additional-assets', function(callback) {
+      var modulesToList = compilation.modules.filter(filterModules)
+      var assetsToList = flatMap(modulesToList, mapModules)
+      var list = format(assetsToList)
 
-    compilation.assets['prefetch-list.txt'] = {
-      source: function() {
-        return prefetchList;
-      },
-      size: function() {
-        return prefetchList.length;
+      if(typeof(list) !== 'string'){
+        list = JSON.stringify(list)
       }
-    };
 
-    callback();
-  });
-};
+      compilation.assets[fileName] = {
+        source: function() {
+          return list
+        },
+        size: function() {
+          return list.length
+        }
+      }
 
-module.exports = FileListPlugin;
+      callback()
+    })
+  })
+}
+
+module.exports = FileListPlugin

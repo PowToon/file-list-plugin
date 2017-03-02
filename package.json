@@ -21,7 +21,10 @@
   "license": "MIT",
   "dependencies": {
     "file-loader": "^0.10.1",
-    "loader-utils": "^1.0.2"
+    "lodash.defaults": "^4.2.0",
+    "lodash.flatmap": "^4.5.0",
+    "lodash.keys": "^4.2.0",
+    "urijs": "^1.18.8"
   },
   "devDependencies": {
     "codecov": "~1.0.1",
