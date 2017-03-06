@@ -1,7 +1,7 @@
 {
   "name": "file-list-plugin",
-  "version": "0.0.2",
-  "description": "A webpack plugin that creates a file list of files omitted by file-loader",
+  "version": "0.0.3",
+  "description": "A webpack plugin to list deployed files.",
   "main": "index.js",
   "scripts": {
     "test": "mocha ./test/loader.spec.js"
@@ -17,7 +17,7 @@
     "priority",
     "above the fold"
   ],
-  "author": "Vitalik Zaidman (vzaidman@gmail.com)",
+  "author": "Powtoon (powtoon@powtoon.com), Vitalik Zaidman (vzaidman@gmail.com)",
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.4"
