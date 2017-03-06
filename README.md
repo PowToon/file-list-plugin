@@ -41,7 +41,7 @@ new FileListPlugin({
     return true
   },
   
-  // what modules to include in th list
+  // what modules to include in the list
   filterModules: function defaultFilterModules(module){
     return true
   },
