@@ -36,25 +36,22 @@ new FileListPlugin({
   // file name of the file the plugin will output
   fileName: 'asset-list.txt',
   
-  // what chunks to include in the list
-  filterChunks: function defaultFilterChunks(chunk){
-    return true
-  },
-  
-  // what modules to include in the list
-  filterModules: function defaultFilterModules(module){
-    return true
-  },
-  
-  // how to map a module to list entries,
-  // by default, module assets are used
-  mapModules: function defaultMapModules(module){
-    return _.keys(module.assets)
+  // how a compilation is transformed onto the items list
+  itemsFromCompilation: function defaultItemsFromCompilation(compilation){
+    return _.keys(compilation.assets)
   },
   
   // how to format the list from list items
   format: function defaultFormat(listItems){
-    return _.uniq(listItems).join('\n')
+    return listItems.join('\n')
   }
 })
 ```
+
+#Changelog
+
+* 0.1.0 -
+    * **BREAKING CHANGE** - `itemsFromCompilation` is now exposed instead of `filterChunks`, `filterModules` and `mapModules`.
+    * Updated all npm packages and added new npm's `package-lock.json`.
+    * Updated tests to support webpack 3 and improved them.
+* 0.0.5 - first stable version.

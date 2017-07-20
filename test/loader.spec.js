@@ -5,6 +5,7 @@ var expect = require('expect.js')
 var webpack = require('webpack')
 var rimraf = require('rimraf')
 
+var ExtractTextPlugin = require('extract-text-webpack-plugin')
 var FileListPlugin = require('../index')
 
 describe('file-list-plugin', function () {
@@ -25,17 +26,21 @@ describe('file-list-plugin', function () {
         filename: bundleFileName
       },
       resolve: {
-        extensions: ['.js', '.scss', '.png'],
-        modules: ['node_modules']
+        extensions: ['.js', '.scss'],
+        modules: [
+          'node_modules',
+          path.resolve(__dirname, './input')
+        ],
+        unsafeCache: false
       },
       module: {
         rules: [
           {
             test: /\.scss$/,
-            use: [
-              { loader: 'css-loader' },
-              { loader: 'sass-loader' }
-            ]
+            use: ExtractTextPlugin.extract({
+              fallback: 'style-loader',
+              use: ['css-loader', 'sass-loader']
+            })
           },
           {
             test: /\.png$/,
@@ -48,8 +53,20 @@ describe('file-list-plugin', function () {
     }, options || {})
   }
 
+  var handleWebpackErrors = function(err, stats){
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    console.log(stats.toString({
+      chunks: true,
+      colors: true
+    }));
+  }
+
   // Clean generated cache files before each test so that we can call each test with an empty state.
-  afterEach(function (done) {
+  beforeEach(function (done) {
     rimraf(outputDir, done)
   })
 
@@ -58,32 +75,24 @@ describe('file-list-plugin', function () {
       var config = getConfig({
         entry: './test/input/logo.js',
         plugins: [
+          new webpack.NoEmitOnErrorsPlugin(),
+          new ExtractTextPlugin('style.css'),
           new FileListPlugin()
         ]
       })
 
-      webpack(config, function (err) {
+      webpack(config, function (err, stats) {
+        handleWebpackErrors(err, stats)
+
         expect(err).to.be(null)
 
         fs.readFile(defaultAssetListFile, function(err, fileListData){
           fileListData = fileListData.toString()
           var fileListLines = fileListData.split('\n')
 
-          expect(fileListLines.length).to.be(2)
+          expect(fileListLines.length).to.be(3)
 
-          fs.readFile(bundleFileSrc, function(err, bundleFileData){
-            bundleFileData = bundleFileData.toString()
-
-            fileListLines.forEach(function(line){
-
-              expect(line.indexOf('.png')).to.not.be(-1)
-
-              expect(bundleFileData.indexOf(line)).to.not.be(-1)
-
-            })
-
-            done()
-          })
+          done()
         })
       })
     })
@@ -91,32 +100,23 @@ describe('file-list-plugin', function () {
       var config = getConfig({
         entry: './test/input/scss.js',
         plugins: [
+          new webpack.NoEmitOnErrorsPlugin(),
+          new ExtractTextPlugin('style.css'),
           new FileListPlugin()
         ]
       })
 
-      webpack(config, function (err) {
+      webpack(config, function (err, stats) {
+        handleWebpackErrors(err, stats)
         expect(err).to.be(null)
 
         fs.readFile(defaultAssetListFile, function(err, fileListData){
           fileListData = fileListData.toString()
           var fileListLines = fileListData.split('\n')
 
-          expect(fileListLines.length).to.be(2)
+          expect(fileListLines.length).to.be(4)
 
-          fs.readFile(bundleFileSrc, function(err, bundleFileData){
-            bundleFileData = bundleFileData.toString()
-
-            fileListLines.forEach(function(line){
-
-              expect(line.indexOf('.png')).to.not.be(-1)
-
-              expect(bundleFileData.indexOf(line)).to.not.be(-1)
-
-            })
-
-            done()
-          })
+          done()
         })
       })
     })
