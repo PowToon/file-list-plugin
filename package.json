@@ -1,6 +1,6 @@
 {
   "name": "file-list-plugin",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A webpack plugin to list deployed files.",
   "main": "index.js",
   "scripts": {
