@@ -1,9 +1,9 @@
-var _ = require('lodash')
+const {isString, defaults} = require('lodash')
 
-var defaultOptions = {
+const defaultOptions = {
   fileName: 'asset-list.txt',
   itemsFromCompilation: function defaultItemsFromCompilation(compilation){
-    return _.keys(compilation.assets)
+    return Object.keys(compilation.assets)
   },
   format: function defaultFormat(listItems){
     return listItems.join('\n')
@@ -11,33 +11,31 @@ var defaultOptions = {
 }
 
 function FileListPlugin(options) {
-  _.defaults(this, options, defaultOptions)
+  defaults(this, options, defaultOptions)
 }
 
+const pluginName = 'file-list-plugin'
+
 FileListPlugin.prototype.apply = function(compiler) {
-  var fileName = this.fileName
-  var itemsFromCompilation = this.itemsFromCompilation
-  var format = this.format
+  const {fileName, itemsFromCompilation, format} = this
 
-  compiler.plugin('emit', function(compilation, callback) {
-    var listItems = itemsFromCompilation(compilation)
+  compiler.hooks.emit.tap(pluginName, (compilation) => {
+    const listItems = itemsFromCompilation(compilation)
 
-    var list = format(listItems)
+    const list = format(listItems)
 
-    if(typeof(list) !== 'string'){
-      list = JSON.stringify(list)
+    if(!isString(list)){
+      throw new Error(`${pluginName}: the format function must return a string.`)
     }
 
     compilation.assets[fileName] = {
-      source: function() {
+      source() {
         return list
       },
-      size: function() {
+      size() {
         return list.length
       }
     }
-
-    callback()
   })
 }
 

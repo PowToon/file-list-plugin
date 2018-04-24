@@ -33,23 +33,35 @@ Where the content of `asset-list-txt` is:
 ```
 new FileListPlugin({
 
-  // file name of the file the plugin will output
+  // The File name of the file the plugin will output
   fileName: 'asset-list.txt',
-  
-  // how a compilation is transformed onto the items list
-  itemsFromCompilation: function defaultItemsFromCompilation(compilation){
-    return _.keys(compilation.assets)
-  },
-  
-  // how to format the list from list items
+
+  // How to format the list from list items
   format: function defaultFormat(listItems){
     return listItems.join('\n')
   }
+
+  // Advanced: how a webpack compilation is transformed onto the items list
+  itemsFromCompilation: function defaultItemsFromCompilation(compilation){
+    return _.keys(compilation.assets)
+  },
 })
 ```
 
 #Changelog
-
+* 2.0.0 -
+    * Support webpack 4.
+    * **BREAKING CHANGE** - Uses es6 (as webpack 4 plugins are).
+    * **BREAKING CHANGE** - Format function that doesn't return a string now fails the plugin.
+    * Added tests.
+    * Improved logging during tests.
+    * Updated all npm packages.
+    * Removed unused dependencies.
+    * Improved readme.
+* 1.0.0 -
+    * Support webpack 3.
+    * Also supports webpack 4 with deprecation errors.
+    * Updated all npm packages.
 * 0.1.0 -
     * **BREAKING CHANGE** - `itemsFromCompilation` is now exposed instead of `filterChunks`, `filterModules` and `mapModules`.
     * Updated all npm packages and added new npm's `package-lock.json`.

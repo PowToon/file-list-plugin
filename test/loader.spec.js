@@ -1,26 +1,32 @@
-var fs = require('fs')
-var path = require('path')
-var assign = require('object-assign')
-var expect = require('expect.js')
-var webpack = require('webpack')
-var rimraf = require('rimraf')
+const fs = require('fs')
+const path = require('path')
+const {assign} = require('lodash')
+const expect = require('expect.js')
+const webpack = require('webpack')
+const rimraf = require('rimraf')
 
-var ExtractTextPlugin = require('extract-text-webpack-plugin')
-var FileListPlugin = require('../index')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const FileListPlugin = require('../index')
 
-describe('file-list-plugin', function () {
+process.traceDeprecation = true
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled rejection of:\n', p, '\nReason:\n', reason)
+})
+
+describe('file-list-plugin', () => {
   'use strict'
 
-  this.timeout(10000)
+  const outputDir = path.resolve(__dirname, './output')
 
-  var outputDir = path.resolve(__dirname, './output'),
-    bundleFileName = 'bundle.js',
-    bundleFileSrc = path.join(outputDir, bundleFileName),
-    defaultAssetListFile = path.join(outputDir, FileListPlugin.defaultOptions.fileName)
+  const bundleFileName = 'bundle.js'
 
-  var getConfig = function (options) {
-    return assign({
+  const defaultAssetListFile = path.join(outputDir, FileListPlugin.defaultOptions.fileName)
+
+  const getConfig = options => {
+    const initialConfig = {
       context: path.resolve(__dirname, '../'),
+      mode: 'development',
+      devtool: false,
       output: {
         path: outputDir,
         filename: bundleFileName
@@ -28,7 +34,7 @@ describe('file-list-plugin', function () {
       resolve: {
         extensions: ['.js', '.scss'],
         modules: [
-          'node_modules',
+          path.resolve(__dirname, 'node_modules'),
           path.resolve(__dirname, './input')
         ],
         unsafeCache: false
@@ -50,45 +56,49 @@ describe('file-list-plugin', function () {
           }
         ]
       }
-    }, options || {})
-  }
-
-  var handleWebpackErrors = function(err, stats){
-    if (err) {
-      console.error(err);
-      return;
     }
 
-    console.log(stats.toString({
-      chunks: true,
-      colors: true
-    }));
+    return assign(initialConfig, options || {})
   }
 
-  // Clean generated cache files before each test so that we can call each test with an empty state.
-  beforeEach(function (done) {
-    rimraf(outputDir, done)
-  })
+  const handleWebpackErrors = function(err, stats, {expectError = false} = {}){
+    if(expectError){
+      if(!err){
+        return new Error('Expected Error to Occur on this output!')
+      }
+      return
+    }
 
-  describe('simple usage', function () {
-    it('should create a list of loaded images when importing them into js', function (done) {
-      var config = getConfig({
+    if(err){
+      console.error('** WEBPACK ERROR **\n\n', err)
+      return
+    }
+
+    console.log(stats.toString('errors-only'))
+  }
+
+  // Clean generated output files before each test.
+  beforeEach(done => rimraf(outputDir, done))
+
+  describe('simple usage', () => {
+
+    it('should create a list of loaded images when importing them into js', done => {
+      const config = getConfig({
         entry: './test/input/logo.js',
         plugins: [
-          new webpack.NoEmitOnErrorsPlugin(),
           new ExtractTextPlugin('style.css'),
           new FileListPlugin()
         ]
       })
 
-      webpack(config, function (err, stats) {
+      webpack(config, (err, stats) => {
         handleWebpackErrors(err, stats)
 
         expect(err).to.be(null)
 
         fs.readFile(defaultAssetListFile, function(err, fileListData){
           fileListData = fileListData.toString()
-          var fileListLines = fileListData.split('\n')
+          const fileListLines = fileListData.split('\n')
 
           expect(fileListLines.length).to.be(3)
 
@@ -96,8 +106,9 @@ describe('file-list-plugin', function () {
         })
       })
     })
-    it('should create a list of loaded images when importing them using url in sass', function (done) {
-      var config = getConfig({
+
+    it('should create a list of loaded images when importing them using url in sass', done => {
+      const config = getConfig({
         entry: './test/input/scss.js',
         plugins: [
           new webpack.NoEmitOnErrorsPlugin(),
@@ -106,13 +117,14 @@ describe('file-list-plugin', function () {
         ]
       })
 
-      webpack(config, function (err, stats) {
+      webpack(config, (err, stats) => {
         handleWebpackErrors(err, stats)
+
         expect(err).to.be(null)
 
         fs.readFile(defaultAssetListFile, function(err, fileListData){
           fileListData = fileListData.toString()
-          var fileListLines = fileListData.split('\n')
+          const fileListLines = fileListData.split('\n')
 
           expect(fileListLines.length).to.be(4)
 
@@ -120,5 +132,27 @@ describe('file-list-plugin', function () {
         })
       })
     })
+
+    it('should fail when format returns not a string', done => {
+      const config = getConfig({
+        entry: './test/input/scss.js',
+        plugins: [
+          new webpack.NoEmitOnErrorsPlugin(),
+          new ExtractTextPlugin('style.css'),
+          new FileListPlugin({
+            format: () => true
+          })
+        ]
+      })
+
+      webpack(config, (err, stats) => {
+        handleWebpackErrors(err, stats, {expectError: true})
+
+        expect(err).to.match(/file-list-plugin: the format function must return a string\./)
+
+        done()
+      })
+    })
+
   })
-})
+}).timeout(5000)
